@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 import '../../board_detail/presentation/board_detail_screen.dart';
 
 class BoardsScreen extends StatelessWidget {
@@ -17,18 +17,18 @@ class BoardsScreen extends StatelessWidget {
     final devicePixelRatio = mediaQuery.devicePixelRatio;
     final defaultTextStyle = DefaultTextStyle.of(context);
     final textHeightBehavior = defaultTextStyle.textHeightBehavior;
-    final headingStyle = defaultTextStyle.style.merge(kHeadingMedium);
-    final captionStyle = defaultTextStyle.style.merge(kCaption);
-    final avatarVisualSize = kAvatarSize + (kAvatarBorderWidth * 2);
+    final headingStyle = defaultTextStyle.style.merge(headingMedium);
+    final captionStyle = defaultTextStyle.style.merge(caption);
+    final avatarVisualSize = avatarSize + (avatarBorderWidth * 2);
 
-    final availableWidth = screenWidth - (kScreenPadding * 2);
-    final rawCardWidth = (availableWidth - kGridSpacingHorizontal) / 2;
+    final availableWidth = screenWidth - (screenPadding * 2);
+    final rawCardWidth = (availableWidth - gridSpacingHorizontal) / 2;
     final cardWidth = _snapToPixelDown(rawCardWidth, devicePixelRatio);
-    final innerWidth = cardWidth - (kPadding8 * 2);
-    final rawImageSize = (innerWidth - kBoardCollageSpacing) / 2;
+    final innerWidth = cardWidth - (AppSpacing.sm * 2);
+    final rawImageSize = (innerWidth - boardCollageSpacing) / 2;
     final collageImageSize = _snapToPixelDown(rawImageSize, devicePixelRatio);
     final collageHeight = _snapToPixelUp(
-      (collageImageSize * 2) + kBoardCollageSpacing + (kPadding8 * 2),
+      (collageImageSize * 2) + boardCollageSpacing + (AppSpacing.sm * 2),
       devicePixelRatio,
     );
     final titleHeight = _snapToPixelUp(
@@ -52,37 +52,37 @@ class BoardsScreen extends StatelessWidget {
     final metaHeight =
         subtitleHeight > avatarVisualSize ? subtitleHeight : avatarVisualSize;
     final cardHeight = _snapToPixelUp(
-      collageHeight + kPadding12 + titleHeight + kPadding4 + metaHeight,
+      collageHeight + AppSpacing.md + titleHeight + AppSpacing.xs + metaHeight,
       devicePixelRatio,
     );
 
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.all(kScreenPadding),
+          padding: const EdgeInsets.all(screenPadding),
           child: Column(
             children: [
               SizedBox(
-                height: kTopNavHeight,
+                height: NavDimensions.topHeight,
                 child: Row(
                   children: [
                     const _FilterButton(label: 'All'),
-                    const SizedBox(width: kPadding12),
+                    const SizedBox(width: AppSpacing.md),
                     const _FilterButton(label: 'Last update'),
                     const Spacer(),
                     _CircleIconButton(icon: AppIcons.magnifier, onTap: () {}),
                   ],
                 ),
               ),
-              const SizedBox(height: kPadding16),
+              const SizedBox(height: AppSpacing.lg),
               Expanded(
                 child: GridView.builder(
                   itemCount: boards.length,
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 2,
-                    mainAxisSpacing: kGridSpacingHorizontal,
-                    crossAxisSpacing: kGridSpacingHorizontal,
+                    mainAxisSpacing: gridSpacingHorizontal,
+                    crossAxisSpacing: gridSpacingHorizontal,
                     mainAxisExtent: cardHeight,
                   ),
                   itemBuilder: (context, index) {
@@ -129,20 +129,20 @@ class _FilterButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kFilterButtonHeight,
-      padding: const EdgeInsets.symmetric(horizontal: kPadding12),
+      height: NavDimensions.filterButtonHeight,
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: kCardColor,
-        borderRadius: BorderRadius.circular(kFilterButtonRadius),
+        color: cardColor,
+        borderRadius: BorderRadius.circular(filterButtonRadius),
       ),
       child: Row(
         children: [
-          Text(label, style: kBodyRegular),
-          const SizedBox(width: kPadding8),
+          Text(label, style: bodyRegular),
+          const SizedBox(width: AppSpacing.sm),
           const Icon(
             AppIcons.arrowDown,
-            color: kWhite,
-            size: kFilterIconSize,
+            color: white,
+            size: filterIconSize,
           ),
         ],
       ),
@@ -164,13 +164,13 @@ class _CircleIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: kActionButtonSize,
-        height: kActionButtonSize,
+        width: NavDimensions.actionButtonSize,
+        height: NavDimensions.actionButtonSize,
         decoration: const BoxDecoration(
-          color: kActionButtonColor,
+          color: actionButtonColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: kWhite, size: kNavIconSize),
+        child: Icon(icon, color: white, size: NavDimensions.iconSize),
       ),
     );
   }
@@ -203,9 +203,9 @@ class _BoardCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final innerWidth = constraints.maxWidth - (kPadding8 * 2);
+        final innerWidth = constraints.maxWidth - (AppSpacing.sm * 2);
         final maxImageSize = _snapToPixelDown(
-          (innerWidth - kBoardCollageSpacing) / 2,
+          (innerWidth - boardCollageSpacing) / 2,
           devicePixelRatio,
         );
         final imageSize = collageImageSize <= maxImageSize
@@ -216,10 +216,10 @@ class _BoardCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(kPadding8),
+              padding: const EdgeInsets.all(AppSpacing.sm),
               decoration: const BoxDecoration(
-                color: kCardColor,
-                borderRadius: kBoardCardRadius,
+                color: cardColor,
+                borderRadius: boardCardRadius,
               ),
               child: Column(
                 children: [
@@ -228,7 +228,7 @@ class _BoardCard extends StatelessWidget {
                     rightUrl: board.imageUrls[1],
                     size: imageSize,
                   ),
-                  const SizedBox(height: kBoardCollageSpacing),
+                  const SizedBox(height: boardCollageSpacing),
                   _CollageRow(
                     leftUrl: board.imageUrls[2],
                     rightUrl: board.imageUrls[3],
@@ -237,7 +237,7 @@ class _BoardCard extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: kPadding12),
+            const SizedBox(height: AppSpacing.md),
             Text(
               board.title,
               style: headingStyle,
@@ -245,7 +245,7 @@ class _BoardCard extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               textHeightBehavior: textHeightBehavior,
             ),
-            const SizedBox(height: kPadding4),
+            const SizedBox(height: AppSpacing.xs),
             SizedBox(
               height: metaHeight,
               child: Row(
@@ -296,7 +296,7 @@ class _CollageRow extends StatelessWidget {
     return Row(
       children: [
         _CollageImage(url: leftUrl, size: size),
-        const SizedBox(width: kBoardCollageSpacing),
+        const SizedBox(width: boardCollageSpacing),
         _CollageImage(url: rightUrl, size: size),
       ],
     );
@@ -315,15 +315,15 @@ class _CollageImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: kCollageImageRadius,
+      borderRadius: collageImageRadius,
       child: SizedBox(
         width: size,
         height: size,
         child: CachedNetworkImage(
           imageUrl: url,
           fit: BoxFit.cover,
-          placeholder: (context, value) => Container(color: kCardColor),
-          errorWidget: (context, value, error) => Container(color: kCardColor),
+          placeholder: (context, value) => Container(color: cardColor),
+          errorWidget: (context, value, error) => Container(color: cardColor),
         ),
       ),
     );
@@ -343,19 +343,19 @@ class _AvatarStack extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: avatarVisualSize,
-      width: avatarVisualSize + (avatars.length - 1) * kAvatarOverlap,
+      width: avatarVisualSize + (avatars.length - 1) * avatarOverlap,
       child: Stack(
         children: [
           for (var i = 0; i < avatars.length; i++)
             Positioned(
-              left: i * kAvatarOverlap,
+              left: i * avatarOverlap,
               child: Container(
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  border: Border.all(color: kBackgroundColor, width: kAvatarBorderWidth),
+                  border: Border.all(color: backgroundColor, width: avatarBorderWidth),
                 ),
                 child: CircleAvatar(
-                  radius: kAvatarSize / 2,
+                  radius: avatarSize / 2,
                   backgroundImage: CachedNetworkImageProvider(avatars[i]),
                 ),
               ),

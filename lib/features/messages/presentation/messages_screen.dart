@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 
 class MessagesScreen extends StatelessWidget {
   const MessagesScreen({super.key});
@@ -8,9 +8,9 @@ class MessagesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Center(
-        child: Text('Messages', style: kHeadingMedium),
+        child: Text('Messages', style: headingMedium),
       ),
     );
   }

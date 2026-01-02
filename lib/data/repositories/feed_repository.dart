@@ -11,7 +11,7 @@ class FeedRepository {
 
   Future<List<PixabayImage>> fetchImages({
     int page = 1,
-    int perPage = kDefaultPerPage,
+    int perPage = defaultPerPage,
     String? query,
     String? imageType,
   }) {

@@ -1,20 +1,33 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 import '../../boards/presentation/boards_screen.dart';
 import '../../feed/presentation/feed_screen.dart';
 import '../../messages/presentation/messages_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
-import '../navigation_provider.dart';
 
-class NavigationShell extends ConsumerWidget {
+class NavigationShell extends StatefulWidget {
   const NavigationShell({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentIndex = ref.watch(navigationProvider);
+  State<NavigationShell> createState() => _NavigationShellState();
+}
+
+class _NavigationShellState extends State<NavigationShell> {
+  int _currentIndex = 0;
+
+  void _setIndex(int index) {
+    if (index == _currentIndex) {
+      return;
+    }
+    setState(() {
+      _currentIndex = index;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentIndex = _currentIndex;
 
     final screens = const [
       FeedScreen(),
@@ -24,30 +37,30 @@ class NavigationShell extends ConsumerWidget {
     ];
 
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: backgroundColor,
       body: IndexedStack(
         index: currentIndex,
         children: screens,
       ),
       floatingActionButton: SizedBox(
-        width: kFabDiameter,
-        height: kFabDiameter,
+        width: FabDimensions.diameter,
+        height: FabDimensions.diameter,
         child: FloatingActionButton(
           onPressed: () {},
-          backgroundColor: kPrimaryColor,
-          elevation: kFabElevation,
+          backgroundColor: primaryColor,
+          elevation: FabDimensions.elevation,
           shape: const CircleBorder(),
           child: const Icon(
             AppIcons.plus,
-            color: kWhite,
-            size: kFabPlusSize,
+            color: white,
+            size: FabDimensions.plusSize,
           ),
         ),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: _BottomNavBar(
         currentIndex: currentIndex,
-        onTap: (index) => ref.read(navigationProvider.notifier).setIndex(index),
+        onTap: _setIndex,
       ),
     );
   }
@@ -67,14 +80,14 @@ class _BottomNavBar extends StatelessWidget {
     final bottomPadding = MediaQuery.paddingOf(context).bottom;
 
     return SizedBox(
-      height: kBottomNavHeight + bottomPadding,
+      height: NavDimensions.bottomHeight + bottomPadding,
       child: SafeArea(
         top: false,
         child: BottomAppBar(
-          color: kBackgroundColor,
+          color: backgroundColor,
           elevation: 0,
           shape: const CircularNotchedRectangle(),
-          notchMargin: kFabNotchMargin,
+          notchMargin: FabDimensions.notchMargin,
           child: Row(
             children: [
               Expanded(
@@ -93,7 +106,7 @@ class _BottomNavBar extends StatelessWidget {
                   onTap: () => onTap(1),
                 ),
               ),
-              const SizedBox(width: kFabDiameter),
+              const SizedBox(width: FabDimensions.diameter),
               Expanded(
                 child: _NavItem(
                   label: 'Messages',
@@ -136,8 +149,8 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconColor = selected ? kPrimaryColor : kWhite50;
-    final labelColor = selected ? kPrimaryColor : kLightGray;
+    final iconColor = selected ? primaryColor : white50;
+    final labelColor = selected ? primaryColor : lightGray;
 
     return GestureDetector(
       onTap: onTap,
@@ -147,26 +160,28 @@ class _NavItem extends StatelessWidget {
           Stack(
             clipBehavior: Clip.none,
             children: [
-              Icon(icon, color: iconColor, size: kNavIconSize),
+              Icon(icon, color: iconColor, size: NavDimensions.iconSize),
               if (showBadge)
                 Positioned(
-                  right: -kBadgeOffset,
-                  top: -kBadgeOffset,
-                  child: Container(
-                    width: kBadgeSize,
-                    height: kBadgeSize,
-                    decoration: const BoxDecoration(
-                      color: kSecondaryRed,
-                      shape: BoxShape.circle,
+                  right: -NavDimensions.badgeOffset,
+                  top: -NavDimensions.badgeOffset,
+                  child: SizedBox(
+                    width: NavDimensions.badgeSize,
+                    height: NavDimensions.badgeSize,
+                    child: const DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: secondaryRed,
+                        shape: BoxShape.circle,
+                      ),
                     ),
                   ),
                 ),
             ],
           ),
-          const SizedBox(height: kPadding4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             label,
-            style: kNavLabel.copyWith(
+            style: navLabel.copyWith(
               color: labelColor,
               fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
             ),

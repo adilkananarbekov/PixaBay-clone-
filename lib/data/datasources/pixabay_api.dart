@@ -12,18 +12,18 @@ class PixabayApi {
 
   Future<List<PixabayImage>> fetchImages({
     int page = 1,
-    int perPage = kDefaultPerPage,
+    int perPage = defaultPerPage,
     String? query,
     String? imageType,
   }) async {
-    if (kPixabayApiKey.isEmpty) {
+    if (pixabayApiKey.isEmpty) {
       throw Exception('Missing Pixabay API key.');
     }
     final trimmedQuery = query?.trim();
     final response = await _dioClient.dio.get<Map<String, dynamic>>(
       '',
       queryParameters: {
-        'key': kPixabayApiKey,
+        'key': pixabayApiKey,
         'page': page,
         'per_page': perPage,
         if (trimmedQuery != null && trimmedQuery.isNotEmpty) 'q': trimmedQuery,

@@ -30,7 +30,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
     try {
       final images = await _repository.fetchImages(
         page: 1,
-        perPage: kDefaultPerPage,
+        perPage: defaultPerPage,
         query: query,
         imageType: imageType,
       );
@@ -38,7 +38,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
         images: images,
         isLoading: false,
         page: 1,
-        hasReachedEnd: images.length < kDefaultPerPage,
+        hasReachedEnd: images.length < defaultPerPage,
       );
     } catch (error) {
       state = state.copyWith(
@@ -59,7 +59,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
     try {
       final images = await _repository.fetchImages(
         page: nextPage,
-        perPage: kDefaultPerPage,
+        perPage: defaultPerPage,
         query: query,
         imageType: imageType,
       );
@@ -67,7 +67,7 @@ class FeedNotifier extends StateNotifier<FeedState> {
         images: [...state.images, ...images],
         isLoadingMore: false,
         page: nextPage,
-        hasReachedEnd: images.length < kDefaultPerPage,
+        hasReachedEnd: images.length < defaultPerPage,
       );
     } catch (error) {
       state = state.copyWith(

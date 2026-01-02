@@ -4,9 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
+import '../../../core/widgets/separator.dart';
 import '../../feed/domain/feed_notifier.dart';
 import '../../feed/presentation/image_card.dart';
+import '../../pin_detail/presentation/pin_detail_screen.dart';
 
 class BoardDetailScreen extends ConsumerStatefulWidget {
   const BoardDetailScreen({
@@ -47,7 +49,7 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
       return;
     }
     final remaining = position.maxScrollExtent - position.pixels;
-    if (remaining <= kScrollLoadOffset) {
+    if (remaining <= scrollLoadOffset) {
       ref.read(queryFeedProvider(_filter).notifier).loadMore();
     }
   }
@@ -56,152 +58,98 @@ class _BoardDetailScreenState extends ConsumerState<BoardDetailScreen> {
   Widget build(BuildContext context) {
     final state = ref.watch(queryFeedProvider(_filter));
     final pins = state.images;
-    final mediaQuery = MediaQuery.of(context);
-    final textScaler = mediaQuery.textScaler;
-    final devicePixelRatio = mediaQuery.devicePixelRatio;
-    final defaultTextStyle = DefaultTextStyle.of(context);
-    final textHeightBehavior = defaultTextStyle.textHeightBehavior;
-    final titleStyle = defaultTextStyle.style.merge(kBodyRegular);
-    final subtitleStyle = defaultTextStyle.style.merge(kCaption);
-    final subBoardInnerWidth = kSubBoardCardWidth - (kPadding8 * 2);
-    final rawSubBoardImageSize =
-        (subBoardInnerWidth - kBoardCollageSpacing) / 2;
-    final subBoardImageSize =
-        _snapToPixelDown(rawSubBoardImageSize, devicePixelRatio);
-    final subBoardCollageHeight = _snapToPixelUp(
-      (subBoardImageSize * 2) + kBoardCollageSpacing + (kPadding8 * 2),
-      devicePixelRatio,
-    );
-    final subBoardTitleHeight = _snapToPixelUp(
-      _measureTextHeight(
-        text: 'Summer vibes',
-        style: titleStyle,
-        textScaler: textScaler,
-        textHeightBehavior: textHeightBehavior,
-      ),
-      devicePixelRatio,
-    );
-    final subBoardSubtitleHeight = _snapToPixelUp(
-      _measureTextHeight(
-        text: '241 pins',
-        style: subtitleStyle,
-        textScaler: textScaler,
-        textHeightBehavior: textHeightBehavior,
-      ),
-      devicePixelRatio,
-    );
-    final subBoardCardHeight = _snapToPixelUp(
-      subBoardCollageHeight + kPadding8 + subBoardTitleHeight + kPadding4 + subBoardSubtitleHeight,
-      devicePixelRatio,
-    );
-    final subBoardListHeight = subBoardCardHeight + (kPadding12 * 2);
 
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           controller: _controller,
           slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: screenPadding),
+              sliver: SliverToBoxAdapter(
                 child: _BoardHeader(title: widget.title),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  kScreenPadding,
-                  kPadding12,
-                  kScreenPadding,
-                  kPadding12,
-                ),
-                child: _CollaboratorsRow(avatars: _avatars),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-                child: _SecretRow(),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(
-                  kScreenPadding,
-                  kPadding16,
-                  kScreenPadding,
-                  kPadding20,
-                ),
-                child: _CategoryRow(items: _categories),
-              ),
-            ),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: kScreenPadding),
-                child: Text('Sub-boards', style: kHeadingMedium),
-              ),
-            ),
-            SliverToBoxAdapter(
-              child: SizedBox(
-                height: subBoardListHeight,
-                child: ListView.separated(
-                  padding: const EdgeInsets.fromLTRB(
-                    kScreenPadding,
-                    kPadding12,
-                    kScreenPadding,
-                    kPadding12,
-                  ),
-                  scrollDirection: Axis.horizontal,
-                  itemBuilder: (context, index) {
-                    return _SubBoardCard(
-                      board: _subBoards[index],
-                      imageSize: subBoardImageSize,
-                      titleHeight: subBoardTitleHeight,
-                      subtitleHeight: subBoardSubtitleHeight,
-                      cardHeight: subBoardCardHeight,
-                      textHeightBehavior: textHeightBehavior,
-                      titleStyle: titleStyle,
-                      subtitleStyle: subtitleStyle,
-                    );
-                  },
-                  separatorBuilder: (context, index) => const SizedBox(width: kPadding12),
-                  itemCount: _subBoards.length,
-                ),
-              ),
-            ),
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: kScreenPadding),
-                child: Text('Pins', style: kHeadingMedium),
               ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
-                kScreenPadding,
-                kPadding12,
-                kScreenPadding,
-                kPadding20,
+                screenPadding,
+                AppSpacing.md,
+                screenPadding,
+                AppSpacing.md,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _CollaboratorsRow(avatars: _avatars),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.symmetric(horizontal: screenPadding),
+              sliver: SliverToBoxAdapter(
+                child: _SecretRow(),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                screenPadding,
+                AppSpacing.lg,
+                screenPadding,
+                AppSpacing.xl,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _CategoryRow(items: _categories),
+              ),
+            ),
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: screenPadding),
+              sliver: SliverToBoxAdapter(
+                child: Text('Sub-boards', style: headingMedium),
+              ),
+            ),
+            SliverToBoxAdapter(
+              child: _SubBoardSection(boards: _subBoards),
+            ),
+            const SliverPadding(
+              padding: EdgeInsets.symmetric(horizontal: screenPadding),
+              sliver: SliverToBoxAdapter(
+                child: Text('Pins', style: headingMedium),
+              ),
+            ),
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                screenPadding,
+                AppSpacing.md,
+                screenPadding,
+                AppSpacing.xl,
               ),
               sliver: SliverMasonryGrid.count(
                 crossAxisCount: 2,
-                mainAxisSpacing: kGridSpacingVertical,
-                crossAxisSpacing: kGridSpacingHorizontal,
+                mainAxisSpacing: gridSpacingVertical,
+                crossAxisSpacing: gridSpacingHorizontal,
                 childCount: pins.length,
                 itemBuilder: (context, index) {
-                  return ImageCard(image: pins[index]);
+                  final image = pins[index];
+                  return ImageCard(
+                    image: image,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => PinDetailScreen(image: image),
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
             ),
             if (state.isLoadingMore)
-              const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.symmetric(horizontal: kScreenPadding),
+              const SliverPadding(
+                padding: EdgeInsets.symmetric(horizontal: screenPadding),
+                sliver: SliverToBoxAdapter(
                   child: _LoadingCard(),
                 ),
               ),
             const SliverToBoxAdapter(
-              child: SizedBox(height: kPadding24),
+              child: SizedBox(height: AppSpacing.xxl),
             ),
           ],
         ),
@@ -218,7 +166,7 @@ class _BoardHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: kTopNavHeight,
+      height: NavDimensions.topHeight,
       child: Stack(
         alignment: Alignment.center,
         children: [
@@ -232,7 +180,7 @@ class _BoardHeader extends StatelessWidget {
           Center(
             child: Text(
               title,
-              style: kBodyRegular.copyWith(fontWeight: FontWeight.w600),
+              style: bodyRegular.copyWith(fontWeight: FontWeight.w600),
               textAlign: TextAlign.center,
             ),
           ),
@@ -241,7 +189,7 @@ class _BoardHeader extends StatelessWidget {
             child: Row(
               children: const [
                 _CircleIconButton(icon: AppIcons.filter),
-                SizedBox(width: kPadding8),
+                SizedBox(width: AppSpacing.sm),
                 _CircleIconButton(icon: AppIcons.menu),
               ],
             ),
@@ -263,13 +211,13 @@ class _CollaboratorsRow extends StatelessWidget {
       children: [
         for (final avatar in avatars)
           Padding(
-            padding: const EdgeInsets.only(right: kPadding8),
+            padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: CircleAvatar(
-              radius: kAvatarSize / 2,
+              radius: avatarSize / 2,
               backgroundImage: CachedNetworkImageProvider(avatar),
             ),
           ),
-        const SizedBox(width: kPadding4),
+        const SizedBox(width: AppSpacing.xs),
         const _CircleIconButton(icon: AppIcons.plus),
       ],
     );
@@ -281,9 +229,9 @@ class _SecretRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: const [
-        Icon(AppIcons.lock, color: kLightGray, size: kFilterIconSize),
-        SizedBox(width: kPadding8),
-        Text('Secret board', style: kCaption),
+        Icon(AppIcons.lock, color: lightGray, size: filterIconSize),
+        SizedBox(width: AppSpacing.sm),
+        Text('Secret board', style: caption),
       ],
     );
   }
@@ -303,16 +251,16 @@ class _CategoryRow extends StatelessWidget {
           Column(
             children: [
               Container(
-                width: kActionButtonSize,
-                height: kActionButtonSize,
+                width: NavDimensions.actionButtonSize,
+                height: NavDimensions.actionButtonSize,
                 decoration: const BoxDecoration(
-                  color: kActionButtonColor,
+                  color: actionButtonColor,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(item.icon, color: kWhite, size: kNavIconSize),
+                child: Icon(item.icon, color: white, size: NavDimensions.iconSize),
               ),
-              const SizedBox(height: kCategoryLabelSpacing),
-              Text(item.label, style: kCaption),
+              const SizedBox(height: categoryLabelSpacing),
+              Text(item.label, style: caption),
             ],
           ),
       ],
@@ -320,77 +268,94 @@ class _CategoryRow extends StatelessWidget {
   }
 }
 
-class _SubBoardCard extends StatelessWidget {
-  const _SubBoardCard({
-    required this.board,
-    required this.imageSize,
-    required this.titleHeight,
-    required this.subtitleHeight,
-    required this.cardHeight,
-    required this.textHeightBehavior,
-    required this.titleStyle,
-    required this.subtitleStyle,
-  });
+class _SubBoardSection extends StatelessWidget {
+  const _SubBoardSection({required this.boards});
 
-  final _SubBoard board;
-  final double imageSize;
-  final double titleHeight;
-  final double subtitleHeight;
-  final double cardHeight;
-  final TextHeightBehavior? textHeightBehavior;
-  final TextStyle titleStyle;
-  final TextStyle subtitleStyle;
+  final List<_SubBoard> boards;
 
   @override
   Widget build(BuildContext context) {
+    final listHeight = _SubBoardCard.heightFor(context) + (AppSpacing.md * 2);
     return SizedBox(
-      width: kSubBoardCardWidth,
-      height: cardHeight,
+      height: listHeight,
+      child: ListView.separated(
+        padding: const EdgeInsets.fromLTRB(
+          screenPadding,
+          AppSpacing.md,
+          screenPadding,
+          AppSpacing.md,
+        ),
+        scrollDirection: Axis.horizontal,
+        itemBuilder: (context, index) {
+          return _SubBoardCard(board: boards[index]);
+        },
+        separatorBuilder: (context, index) => Separator.w12(),
+        itemCount: boards.length,
+      ),
+    );
+  }
+}
+
+class _SubBoardCard extends StatelessWidget {
+  const _SubBoardCard({required this.board});
+
+  final _SubBoard board;
+
+  static double heightFor(BuildContext context) {
+    return _SubBoardLayout.fromContext(context).cardHeight;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final layout = _SubBoardLayout.fromContext(context);
+    return SizedBox(
+      width: subBoardCardWidth,
+      height: layout.cardHeight,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            padding: const EdgeInsets.all(kPadding8),
+            padding: const EdgeInsets.all(AppSpacing.sm),
             decoration: const BoxDecoration(
-              color: kCardColor,
-              borderRadius: kBoardCardRadius,
+              color: cardColor,
+              borderRadius: boardCardRadius,
             ),
             child: Column(
               children: [
                 _SubBoardRow(
                   leftUrl: board.imageUrls[0],
                   rightUrl: board.imageUrls[1],
-                  size: imageSize,
+                  size: layout.imageSize,
                 ),
-                const SizedBox(height: kBoardCollageSpacing),
+                const SizedBox(height: boardCollageSpacing),
                 _SubBoardRow(
                   leftUrl: board.imageUrls[2],
                   rightUrl: board.imageUrls[3],
-                  size: imageSize,
+                  size: layout.imageSize,
                 ),
               ],
             ),
           ),
-          const SizedBox(height: kPadding8),
+          const SizedBox(height: AppSpacing.sm),
           SizedBox(
-            height: titleHeight,
+            height: layout.titleHeight,
             child: Text(
               board.title,
-              style: titleStyle,
+              style: layout.titleStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textHeightBehavior: textHeightBehavior,
+              textHeightBehavior: layout.textHeightBehavior,
             ),
           ),
-          const SizedBox(height: kPadding4),
+          const SizedBox(height: AppSpacing.xs),
           SizedBox(
-            height: subtitleHeight,
+            height: layout.subtitleHeight,
             child: Text(
               board.subtitle,
-              style: subtitleStyle,
+              style: layout.subtitleStyle,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              textHeightBehavior: textHeightBehavior,
+              textHeightBehavior: layout.textHeightBehavior,
             ),
           ),
         ],
@@ -415,7 +380,7 @@ class _SubBoardRow extends StatelessWidget {
     return Row(
       children: [
         _SubBoardImage(url: leftUrl, size: size),
-        const SizedBox(width: kBoardCollageSpacing),
+        const SizedBox(width: boardCollageSpacing),
         _SubBoardImage(url: rightUrl, size: size),
       ],
     );
@@ -434,15 +399,15 @@ class _SubBoardImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: kCollageImageRadius,
+      borderRadius: collageImageRadius,
       child: SizedBox(
         width: size,
         height: size,
         child: CachedNetworkImage(
           imageUrl: url,
           fit: BoxFit.cover,
-          placeholder: (context, value) => Container(color: kCardColor),
-          errorWidget: (context, value, error) => Container(color: kCardColor),
+          placeholder: (context, value) => Container(color: cardColor),
+          errorWidget: (context, value, error) => Container(color: cardColor),
         ),
       ),
     );
@@ -463,13 +428,13 @@ class _CircleIconButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: kActionButtonSize,
-        height: kActionButtonSize,
+        width: NavDimensions.actionButtonSize,
+        height: NavDimensions.actionButtonSize,
         decoration: const BoxDecoration(
-          color: kActionButtonColor,
+          color: actionButtonColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: kWhite, size: kNavIconSize),
+        child: Icon(icon, color: white, size: NavDimensions.iconSize),
       ),
     );
   }
@@ -481,10 +446,10 @@ class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kLoadingCardHeight,
+      height: loadingCardHeight,
       decoration: BoxDecoration(
-        color: kCardColor,
-        borderRadius: kImageCardRadius,
+        color: cardColor,
+        borderRadius: imageCardRadius,
       ),
     );
   }
@@ -507,6 +472,75 @@ class _SubBoard {
   final String title;
   final String subtitle;
   final List<String> imageUrls;
+}
+
+class _SubBoardLayout {
+  const _SubBoardLayout({
+    required this.imageSize,
+    required this.titleHeight,
+    required this.subtitleHeight,
+    required this.cardHeight,
+    required this.titleStyle,
+    required this.subtitleStyle,
+    required this.textHeightBehavior,
+  });
+
+  final double imageSize;
+  final double titleHeight;
+  final double subtitleHeight;
+  final double cardHeight;
+  final TextStyle titleStyle;
+  final TextStyle subtitleStyle;
+  final TextHeightBehavior? textHeightBehavior;
+
+  static _SubBoardLayout fromContext(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final textScaler = mediaQuery.textScaler;
+    final devicePixelRatio = mediaQuery.devicePixelRatio;
+    final defaultTextStyle = DefaultTextStyle.of(context);
+    final textHeightBehavior = defaultTextStyle.textHeightBehavior;
+    final titleStyle = defaultTextStyle.style.merge(bodyRegular);
+    final subtitleStyle = defaultTextStyle.style.merge(caption);
+    final subBoardInnerWidth = subBoardCardWidth - (AppSpacing.sm * 2);
+    final rawImageSize = (subBoardInnerWidth - boardCollageSpacing) / 2;
+    final imageSize = _snapToPixelDown(rawImageSize, devicePixelRatio);
+    final collageHeight = _snapToPixelUp(
+      (imageSize * 2) + boardCollageSpacing + (AppSpacing.sm * 2),
+      devicePixelRatio,
+    );
+    final titleHeight = _snapToPixelUp(
+      _measureTextHeight(
+        text: 'Summer vibes',
+        style: titleStyle,
+        textScaler: textScaler,
+        textHeightBehavior: textHeightBehavior,
+      ),
+      devicePixelRatio,
+    );
+    final subtitleHeight = _snapToPixelUp(
+      _measureTextHeight(
+        text: '241 pins',
+        style: subtitleStyle,
+        textScaler: textScaler,
+        textHeightBehavior: textHeightBehavior,
+      ),
+      devicePixelRatio,
+    );
+    final cardHeight = _snapToPixelUp(
+      collageHeight + AppSpacing.sm + titleHeight + AppSpacing.xs + subtitleHeight,
+      devicePixelRatio,
+    );
+
+    return _SubBoardLayout(
+      imageSize: imageSize,
+      titleHeight: titleHeight,
+      subtitleHeight: subtitleHeight,
+      cardHeight: cardHeight,
+      titleStyle: titleStyle,
+      subtitleStyle: subtitleStyle,
+      textHeightBehavior: textHeightBehavior,
+    );
+  }
 }
 
 double _measureTextHeight({

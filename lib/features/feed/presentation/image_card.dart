@@ -1,7 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 import '../../../data/models/pixabay_image.dart';
 
 class ImageCard extends StatelessWidget {
@@ -21,18 +21,18 @@ class ImageCard extends StatelessWidget {
 
     if (!hasDimensions) {
       return Container(
-        height: kLoadingCardHeight,
+        height: loadingCardHeight,
         decoration: BoxDecoration(
-          color: kCardColor,
-          borderRadius: kImageCardRadius,
+          color: cardColor,
+          borderRadius: imageCardRadius,
         ),
         child: const Center(
           child: SizedBox(
-            width: kLoaderSize,
-            height: kLoaderSize,
+            width: loaderSize,
+            height: loaderSize,
             child: CircularProgressIndicator(
-              strokeWidth: kLoaderStroke,
-              color: kWhite,
+              strokeWidth: loaderStroke,
+              color: white,
             ),
           ),
         ),
@@ -42,7 +42,7 @@ class ImageCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
-        borderRadius: kImageCardRadius,
+        borderRadius: imageCardRadius,
         child: Stack(
           children: [
             AspectRatio(
@@ -51,39 +51,39 @@ class ImageCard extends StatelessWidget {
                 imageUrl: imageUrl,
                 fit: BoxFit.cover,
                 progressIndicatorBuilder: (context, url, progress) => Container(
-                  color: kCardColor,
+                  color: cardColor,
                   child: const Center(
                     child: SizedBox(
-                      width: kLoaderSize,
-                      height: kLoaderSize,
+                      width: loaderSize,
+                      height: loaderSize,
                       child: CircularProgressIndicator(
-                        strokeWidth: kLoaderStroke,
-                        color: kWhite,
+                        strokeWidth: loaderStroke,
+                        color: white,
                       ),
                     ),
                   ),
                 ),
                 errorWidget: (context, url, error) => Container(
-                  color: kCardColor,
+                  color: cardColor,
                 ),
               ),
             ),
             const Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
-                  gradient: kImageOverlayGradient,
+                  gradient: imageOverlayGradient,
                 ),
               ),
             ),
             Positioned(
-              left: kPadding12,
-              right: kPadding12,
-              bottom: kPadding12,
+              left: AppSpacing.md,
+              right: AppSpacing.md,
+              bottom: AppSpacing.md,
               child: Text(
                 image.title,
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
-                style: kBodyRegular,
+                style: bodyRegular,
               ),
             ),
           ],

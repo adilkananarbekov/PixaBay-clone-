@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/constants/styles.dart';
+import 'core/constants/design_tokens.dart';
 import 'features/navigation/presentation/navigation_shell.dart';
 
 void main() {
@@ -15,27 +15,27 @@ class PixabayApp extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = ThemeData(
       brightness: Brightness.dark,
-      scaffoldBackgroundColor: kBackgroundColor,
+      scaffoldBackgroundColor: backgroundColor,
       colorScheme: const ColorScheme.dark(
-        primary: kPrimaryColor,
-        secondary: kSecondaryRed,
-        surface: kCardColor,
-        onPrimary: kWhite,
-        onSurface: kWhite,
+        primary: primaryColor,
+        secondary: secondaryRed,
+        surface: cardColor,
+        onPrimary: white,
+        onSurface: white,
       ),
       textTheme: const TextTheme(
-        headlineLarge: kHeadingLarge,
-        headlineMedium: kHeadingMedium,
-        bodyLarge: kBodyRegular,
-        bodyMedium: kBodyRegular,
-        bodySmall: kCaption,
+        headlineLarge: headingLarge,
+        headlineMedium: headingMedium,
+        bodyLarge: bodyRegular,
+        bodyMedium: bodyRegular,
+        bodySmall: caption,
       ),
       appBarTheme: const AppBarTheme(
-        backgroundColor: kBackgroundColor,
+        backgroundColor: backgroundColor,
         elevation: 0,
       ),
       bottomAppBarTheme: const BottomAppBarThemeData(
-        color: kBackgroundColor,
+        color: backgroundColor,
         elevation: 0,
       ),
     );

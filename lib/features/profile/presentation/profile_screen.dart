@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -8,9 +8,9 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return const Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: backgroundColor,
       body: Center(
-        child: Text('Profile', style: kHeadingMedium),
+        child: Text('Profile', style: headingMedium),
       ),
     );
   }

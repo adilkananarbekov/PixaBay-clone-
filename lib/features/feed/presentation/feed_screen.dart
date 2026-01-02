@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 import '../../../data/models/pixabay_image.dart';
 import '../domain/feed_notifier.dart';
 import '../domain/feed_state.dart';
@@ -29,15 +29,15 @@ class FeedScreen extends ConsumerWidget {
               children: [
                 const ExploreSingleView(),
                 Padding(
-                  padding: const EdgeInsets.only(top: kTopNavHeight + kPadding16),
+                  padding: const EdgeInsets.only(top: NavDimensions.topHeight + AppSpacing.lg),
                   child: const FeedGrid(showCta: true),
                 ),
               ],
             ),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+              padding: const EdgeInsets.symmetric(horizontal: screenPadding),
               child: SizedBox(
-                height: kTopNavHeight,
+                height: NavDimensions.topHeight,
                 child: Row(
                   children: [
                     _CircleIconButton(
@@ -45,17 +45,17 @@ class FeedScreen extends ConsumerWidget {
                       showBadge: true,
                       onTap: () {},
                     ),
-                    const SizedBox(width: kPadding12),
+                    const SizedBox(width: AppSpacing.md),
                     Expanded(
                       child: LayoutBuilder(
                         builder: (context, constraints) {
                           final maxTabWidth = constraints.maxWidth / 2;
                           final tabWidth =
-                              maxTabWidth < kTabItemWidth ? maxTabWidth : kTabItemWidth;
+                              maxTabWidth < NavDimensions.tabItemWidth ? maxTabWidth : NavDimensions.tabItemWidth;
 
                           return Center(
                             child: SizedBox(
-                              height: kTabCapsuleHeight,
+                              height: NavDimensions.tabCapsuleHeight,
                               child: TabBar(
                                 isScrollable: true,
                                 onTap: (index) {
@@ -65,15 +65,15 @@ class FeedScreen extends ConsumerWidget {
                                 },
                                 dividerColor: Colors.transparent,
                                 indicator: BoxDecoration(
-                                  color: kWhite,
-                                  borderRadius: BorderRadius.circular(kFilterButtonRadius),
+                                  color: white,
+                                  borderRadius: BorderRadius.circular(filterButtonRadius),
                                 ),
                                 indicatorSize: TabBarIndicatorSize.tab,
-                                indicatorPadding: const EdgeInsets.all(kTabIndicatorInset),
-                                labelColor: kBackgroundColor,
-                                unselectedLabelColor: kWhite50,
-                                labelStyle: kBodyRegular.copyWith(fontWeight: FontWeight.w600),
-                                unselectedLabelStyle: kBodyRegular.copyWith(fontWeight: FontWeight.w500),
+                                indicatorPadding: const EdgeInsets.all(tabIndicatorInset),
+                                labelColor: backgroundColor,
+                                unselectedLabelColor: white50,
+                                labelStyle: bodyRegular.copyWith(fontWeight: FontWeight.w600),
+                                unselectedLabelStyle: bodyRegular.copyWith(fontWeight: FontWeight.w500),
                                 labelPadding: EdgeInsets.zero,
                                 tabs: [
                                   SizedBox(
@@ -91,7 +91,7 @@ class FeedScreen extends ConsumerWidget {
                         },
                       ),
                     ),
-                    const SizedBox(width: kPadding12),
+                    const SizedBox(width: AppSpacing.md),
                     _CircleIconButton(
                       icon: AppIcons.magnifier,
                       onTap: () {},
@@ -116,16 +116,27 @@ class ExploreSingleView extends ConsumerStatefulWidget {
 
 class _ExploreSingleViewState extends ConsumerState<ExploreSingleView> {
   late final PageController _controller;
+  late final ProviderSubscription<FeedState> _prefetchSubscription;
   int? _lastPrefetchIndex;
 
   @override
   void initState() {
     super.initState();
     _controller = PageController();
+    _prefetchSubscription = ref.listenManual<FeedState>(feedProvider, (previous, next) {
+      if (!mounted || next.images.isEmpty) {
+        return;
+      }
+      final pageIndex = _controller.hasClients
+          ? (_controller.page?.round() ?? _controller.initialPage)
+          : 0;
+      _prefetchAround(pageIndex, next.images);
+    });
   }
 
   @override
   void dispose() {
+    _prefetchSubscription.close();
     _controller.dispose();
     super.dispose();
   }
@@ -142,38 +153,38 @@ class _ExploreSingleViewState extends ConsumerState<ExploreSingleView> {
     if (state.errorMessage != null && images.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(kScreenPadding),
+          padding: const EdgeInsets.all(screenPadding),
           child: Text(
             'Unable to load the feed. Add a Pixabay API key to continue.',
-            style: kBodyRegular,
+            style: bodyRegular,
             textAlign: TextAlign.center,
           ),
         ),
       );
     }
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted || images.isEmpty) {
-        return;
-      }
-      final pageIndex = _controller.hasClients
-          ? (_controller.page?.round() ?? _controller.initialPage)
-          : 0;
-      _prefetchAround(pageIndex, images);
-    });
-
     return PageView.builder(
       controller: _controller,
       scrollDirection: Axis.vertical,
       itemCount: images.length,
       onPageChanged: (index) {
-        if (index >= images.length - kExploreLoadAhead) {
+        if (index >= images.length - exploreLoadAhead) {
           ref.read(feedProvider.notifier).loadMore();
         }
         _prefetchAround(index, images);
       },
       itemBuilder: (context, index) {
-        return _ExploreHeroCard(image: images[index]);
+        final image = images[index];
+        return _ExploreHeroCard(
+          image: image,
+          onTap: () {
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (context) => PinDetailScreen(image: image),
+              ),
+            );
+          },
+        );
       },
     );
   }
@@ -183,7 +194,7 @@ class _ExploreSingleViewState extends ConsumerState<ExploreSingleView> {
       return;
     }
     _lastPrefetchIndex = index;
-    for (var offset = 1; offset <= kExplorePrefetchCount; offset++) {
+    for (var offset = 1; offset <= explorePrefetchCount; offset++) {
       final targetIndex = index + offset;
       if (targetIndex >= images.length) {
         break;
@@ -204,18 +215,18 @@ class _ExploreSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
+      padding: const EdgeInsets.symmetric(horizontal: screenPadding),
       child: ClipRRect(
-        borderRadius: kPinDetailRadius,
+        borderRadius: pinDetailRadius,
         child: Container(
-          color: kCardColor,
+          color: cardColor,
           child: const Center(
             child: SizedBox(
-              width: kLoaderSize,
-              height: kLoaderSize,
+              width: loaderSize,
+              height: loaderSize,
               child: CircularProgressIndicator(
-                strokeWidth: kLoaderStroke,
-                color: kWhite,
+                strokeWidth: loaderStroke,
+                color: white,
               ),
             ),
           ),
@@ -226,74 +237,81 @@ class _ExploreSkeleton extends StatelessWidget {
 }
 
 class _ExploreHeroCard extends StatelessWidget {
-  const _ExploreHeroCard({required this.image});
+  const _ExploreHeroCard({
+    required this.image,
+    required this.onTap,
+  });
 
   final PixabayImage image;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final imageUrl = image.largeImageUrl.isNotEmpty ? image.largeImageUrl : image.webformatUrl;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-      child: ClipRRect(
-        borderRadius: kPinDetailRadius,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            CachedNetworkImage(
-              imageUrl: imageUrl,
-              fit: BoxFit.cover,
-              progressIndicatorBuilder: (context, url, progress) => Container(
-                color: kCardColor,
-                child: const Center(
-                  child: SizedBox(
-                    width: kLoaderSize,
-                    height: kLoaderSize,
-                    child: CircularProgressIndicator(
-                      strokeWidth: kLoaderStroke,
-                      color: kWhite,
+    return GestureDetector(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: screenPadding),
+        child: ClipRRect(
+          borderRadius: pinDetailRadius,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                progressIndicatorBuilder: (context, url, progress) => Container(
+                  color: cardColor,
+                  child: const Center(
+                    child: SizedBox(
+                      width: loaderSize,
+                      height: loaderSize,
+                      child: CircularProgressIndicator(
+                        strokeWidth: loaderStroke,
+                        color: white,
+                      ),
                     ),
                   ),
                 ),
+                errorWidget: (context, url, error) => Container(color: cardColor),
               ),
-              errorWidget: (context, url, error) => Container(color: kCardColor),
-            ),
-            const Positioned.fill(
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  gradient: kImageOverlayGradient,
+              const Positioned.fill(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: imageOverlayGradient,
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              left: kPadding16,
-              right: kPadding16,
-              bottom: kPadding16,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(image.user, style: kCaption),
-                        const SizedBox(height: kPadding4),
-                        Text(
-                          image.title,
-                          style: kHeadingMedium,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
+              Positioned(
+                left: AppSpacing.lg,
+                right: AppSpacing.lg,
+                bottom: AppSpacing.lg,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(image.user, style: caption),
+                          const SizedBox(height: AppSpacing.xs),
+                          Text(
+                            image.title,
+                            style: headingMedium,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  _ExploreActions(user: image.user),
-                ],
+                    _ExploreActions(user: image.user),
+                  ],
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -313,18 +331,18 @@ class _ExploreActions extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         CircleAvatar(
-          radius: kActionButtonSize / 2,
-          backgroundColor: kPrimaryColor,
+          radius: NavDimensions.actionButtonSize / 2,
+          backgroundColor: primaryColor,
           child: Text(
             initial,
-            style: kBodyRegular.copyWith(fontWeight: FontWeight.w700),
+            style: bodyRegular.copyWith(fontWeight: FontWeight.w700),
           ),
         ),
-        const SizedBox(height: kExploreActionSpacing),
+        const SizedBox(height: exploreActionSpacing),
         const _ExploreActionButton(icon: AppIcons.pin),
-        const SizedBox(height: kExploreActionSpacing),
+        const SizedBox(height: exploreActionSpacing),
         const _ExploreActionButton(icon: AppIcons.reply),
-        const SizedBox(height: kExploreActionSpacing),
+        const SizedBox(height: exploreActionSpacing),
         const _ExploreActionButton(icon: AppIcons.menu),
       ],
     );
@@ -339,13 +357,13 @@ class _ExploreActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: kActionButtonSize,
-      height: kActionButtonSize,
+      width: NavDimensions.actionButtonSize,
+      height: NavDimensions.actionButtonSize,
       decoration: const BoxDecoration(
-        color: kActionButtonColor,
+        color: actionButtonColor,
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: kWhite, size: kNavIconSize),
+      child: Icon(icon, color: white, size: NavDimensions.iconSize),
     );
   }
 }
@@ -387,7 +405,7 @@ class _FeedGridState extends ConsumerState<FeedGrid> {
       return;
     }
     final remaining = position.maxScrollExtent - position.pixels;
-    if (remaining <= kScrollLoadOffset) {
+    if (remaining <= scrollLoadOffset) {
       ref.read(feedProvider.notifier).loadMore();
     }
   }
@@ -406,10 +424,10 @@ class _FeedGridState extends ConsumerState<FeedGrid> {
     if (state.errorMessage != null && images.isEmpty) {
       return Center(
         child: Padding(
-          padding: const EdgeInsets.all(kScreenPadding),
+          padding: const EdgeInsets.all(screenPadding),
           child: Text(
             'Unable to load the feed. Add a Pixabay API key to continue.',
-            style: kBodyRegular,
+            style: bodyRegular,
             textAlign: TextAlign.center,
           ),
         ),
@@ -421,13 +439,13 @@ class _FeedGridState extends ConsumerState<FeedGrid> {
       slivers: [
         SliverPadding(
           padding: const EdgeInsets.symmetric(
-            horizontal: kScreenPadding,
-            vertical: kPadding12,
+            horizontal: screenPadding,
+            vertical: AppSpacing.md,
           ),
           sliver: SliverMasonryGrid.count(
             crossAxisCount: 2,
-            mainAxisSpacing: kGridSpacingVertical,
-            crossAxisSpacing: kGridSpacingHorizontal,
+            mainAxisSpacing: gridSpacingVertical,
+            crossAxisSpacing: gridSpacingHorizontal,
             childCount: totalCount,
             itemBuilder: (context, index) {
               if (state.isLoadingMore && index == totalCount - 1) {
@@ -468,20 +486,20 @@ class _SkeletonGrid extends StatelessWidget {
     return MasonryGridView.count(
       controller: controller,
       padding: const EdgeInsets.symmetric(
-        horizontal: kScreenPadding,
-        vertical: kPadding12,
+        horizontal: screenPadding,
+        vertical: AppSpacing.md,
       ),
       crossAxisCount: 2,
-      mainAxisSpacing: kGridSpacingVertical,
-      crossAxisSpacing: kGridSpacingHorizontal,
+      mainAxisSpacing: gridSpacingVertical,
+      crossAxisSpacing: gridSpacingHorizontal,
       itemCount: 8,
       itemBuilder: (context, index) {
-        final height = index.isEven ? kSkeletonCardHeightSmall : kSkeletonCardHeightLarge;
+        final height = index.isEven ? skeletonCardHeightSmall : skeletonCardHeightLarge;
         return Container(
           height: height,
           decoration: BoxDecoration(
-            color: kCardColor,
-            borderRadius: kImageCardRadius,
+            color: cardColor,
+            borderRadius: imageCardRadius,
           ),
         );
       },
@@ -495,10 +513,10 @@ class _LoadingCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kLoadingCardHeight,
+      height: loadingCardHeight,
       decoration: BoxDecoration(
-        color: kCardColor,
-        borderRadius: kImageCardRadius,
+        color: cardColor,
+        borderRadius: imageCardRadius,
       ),
     );
   }
@@ -510,11 +528,11 @@ class _CtaCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kCtaCardHeight,
-      padding: const EdgeInsets.all(kPadding16),
+      height: ctaCardHeight,
+      padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: kPrimaryColor,
-        borderRadius: kImageCardRadius,
+        color: primaryColor,
+        borderRadius: imageCardRadius,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -523,20 +541,20 @@ class _CtaCard extends StatelessWidget {
           Align(
             alignment: Alignment.topRight,
             child: Transform.rotate(
-              angle: kCtaArrowRotation,
+              angle: ctaArrowRotation,
               child: Icon(
                 AppIcons.arrowRightUp,
-                color: kWhite,
-                size: kCtaArrowSize,
+                color: white,
+                size: ctaArrowSize,
               ),
             ),
           ),
           Text(
             'Summer vibe\ninspiration',
-            style: kBodyRegular.copyWith(
-              fontSize: kCtaTitleSize,
+            style: bodyRegular.copyWith(
+              fontSize: ctaTitleSize,
               fontWeight: FontWeight.w600,
-              height: kCtaTitleLineHeight,
+              height: ctaTitleLineHeight,
             ),
           ),
         ],
@@ -564,27 +582,27 @@ class _CircleIconButton extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           Container(
-            width: kActionButtonSize,
-            height: kActionButtonSize,
+            width: NavDimensions.actionButtonSize,
+            height: NavDimensions.actionButtonSize,
             decoration: const BoxDecoration(
-              color: kActionButtonColor,
+              color: actionButtonColor,
               shape: BoxShape.circle,
             ),
             child: Icon(
               icon,
-              color: kWhite,
-              size: kNavIconSize,
+              color: white,
+              size: NavDimensions.iconSize,
             ),
           ),
           if (showBadge)
             Positioned(
-              right: -kBadgeOffset,
-              top: -kBadgeOffset,
+              right: -NavDimensions.badgeOffset,
+              top: -NavDimensions.badgeOffset,
               child: Container(
-                width: kBadgeSize,
-                height: kBadgeSize,
+                width: NavDimensions.badgeSize,
+                height: NavDimensions.badgeSize,
                 decoration: const BoxDecoration(
-                  color: kSecondaryRed,
+                  color: secondaryRed,
                   shape: BoxShape.circle,
                 ),
               ),

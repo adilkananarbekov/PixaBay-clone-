@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 
 import '../../../core/constants/app_icons.dart';
-import '../../../core/constants/styles.dart';
+import '../../../core/constants/design_tokens.dart';
 import '../../../data/models/pixabay_image.dart';
 import '../../feed/domain/feed_notifier.dart';
 import '../../feed/presentation/image_card.dart';
@@ -56,7 +56,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
       return;
     }
     final remaining = position.maxScrollExtent - position.pixels;
-    if (remaining <= kScrollLoadOffset) {
+    if (remaining <= scrollLoadOffset) {
       ref.read(queryFeedProvider(_filter).notifier).loadMore();
     }
   }
@@ -76,7 +76,7 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: kBackgroundColor,
+      backgroundColor: backgroundColor,
       body: SafeArea(
         child: CustomScrollView(
           controller: _controller,
@@ -89,41 +89,51 @@ class _PinDetailScreenState extends ConsumerState<PinDetailScreen> {
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: kScreenPadding),
-                child: Text('Similar pins', style: kHeadingMedium),
+                padding: const EdgeInsets.symmetric(horizontal: screenPadding),
+                child: Text('Similar pins', style: headingMedium),
               ),
             ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(
-                kScreenPadding,
-                kPadding12,
-                kScreenPadding,
-                kPadding20,
+                screenPadding,
+                AppSpacing.md,
+                screenPadding,
+                AppSpacing.xl,
               ),
               sliver: SliverMasonryGrid.count(
                 crossAxisCount: 2,
-                mainAxisSpacing: kGridSpacingVertical,
-                crossAxisSpacing: kGridSpacingHorizontal,
+                mainAxisSpacing: gridSpacingVertical,
+                crossAxisSpacing: gridSpacingHorizontal,
                 childCount: similar.length,
                 itemBuilder: (context, index) {
-                  return ImageCard(image: similar[index]);
+                  final image = similar[index];
+                  return ImageCard(
+                    image: image,
+                    onTap: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(
+                          builder: (context) => PinDetailScreen(image: image),
+                        ),
+                      );
+                    },
+                  );
                 },
               ),
             ),
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.only(bottom: kPadding24),
+                padding: const EdgeInsets.only(bottom: AppSpacing.xxl),
                 child: Center(
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: kPadding24,
-                      vertical: kPadding12,
+                      horizontal: AppSpacing.xxl,
+                      vertical: AppSpacing.md,
                     ),
                     decoration: BoxDecoration(
-                      color: kCardColor,
-                      borderRadius: kLoadMoreRadius,
+                      color: cardColor,
+                      borderRadius: loadMoreRadius,
                     ),
-                    child: const Text('Load more', style: kBodyRegular),
+                    child: const Text('Load more', style: bodyRegular),
                   ),
                 ),
               ),
@@ -143,14 +153,14 @@ class _HeroSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = image.largeImageUrl.isNotEmpty ? image.largeImageUrl : image.webformatUrl;
-    final height = MediaQuery.sizeOf(context).height * kPinHeroHeightRatio;
+    final height = MediaQuery.sizeOf(context).height * pinHeroHeightRatio;
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(kScreenPadding, kPadding16, kScreenPadding, kPadding16),
+      padding: const EdgeInsets.fromLTRB(screenPadding, AppSpacing.lg, screenPadding, AppSpacing.lg),
       child: Stack(
         children: [
           ClipRRect(
-            borderRadius: kPinDetailRadius,
+            borderRadius: pinDetailRadius,
             child: CachedNetworkImage(
               imageUrl: imageUrl,
               height: height,
@@ -158,28 +168,28 @@ class _HeroSection extends StatelessWidget {
               fit: BoxFit.cover,
               progressIndicatorBuilder: (context, url, progress) => Container(
                 height: height,
-                color: kCardColor,
+                color: cardColor,
                 child: const Center(
                   child: SizedBox(
-                    width: kLoaderSize,
-                    height: kLoaderSize,
+                    width: loaderSize,
+                    height: loaderSize,
                     child: CircularProgressIndicator(
-                      strokeWidth: kLoaderStroke,
-                      color: kWhite,
+                      strokeWidth: loaderStroke,
+                      color: white,
                     ),
                   ),
                 ),
               ),
               errorWidget: (context, url, error) => Container(
                 height: height,
-                color: kCardColor,
+                color: cardColor,
               ),
             ),
           ),
           Positioned(
-            left: kPadding12,
-            right: kPadding12,
-            top: kPadding12,
+            left: AppSpacing.md,
+            right: AppSpacing.md,
+            top: AppSpacing.md,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -207,40 +217,40 @@ class _SponsorRow extends StatelessWidget {
     final displayBrand = brand.isNotEmpty ? brand : 'Pixabay';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(kScreenPadding, 0, kScreenPadding, kPadding20),
+      padding: const EdgeInsets.fromLTRB(screenPadding, 0, screenPadding, AppSpacing.xl),
       child: Row(
         children: [
           Container(
-            width: kActionButtonSize,
-            height: kActionButtonSize,
+            width: NavDimensions.actionButtonSize,
+            height: NavDimensions.actionButtonSize,
             decoration: const BoxDecoration(
-              color: kCardColor,
+              color: cardColor,
               shape: BoxShape.circle,
             ),
             child: const Center(
               child: Icon(
                 AppIcons.profile,
-                color: kWhite,
-                size: kSponsorLogoSize,
+                color: white,
+                size: sponsorLogoSize,
               ),
             ),
           ),
-          const SizedBox(width: kPadding12),
+          const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Sponsored by', style: kCaption),
-                const SizedBox(height: kPadding4),
+                const Text('Sponsored by', style: caption),
+                const SizedBox(height: AppSpacing.xs),
                 Row(
                   children: [
-                    Text(displayBrand, style: kBodyRegular),
-                    const SizedBox(width: kPadding8),
+                    Text(displayBrand, style: bodyRegular),
+                    const SizedBox(width: AppSpacing.sm),
                     Container(
-                      width: kSponsorDotSize,
-                      height: kSponsorDotSize,
+                      width: sponsorDotSize,
+                      height: sponsorDotSize,
                       decoration: const BoxDecoration(
-                        color: kSecondaryRed,
+                        color: secondaryRed,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -252,9 +262,9 @@ class _SponsorRow extends StatelessWidget {
           Row(
             children: const [
               _ActionIconButton(icon: AppIcons.pin),
-              SizedBox(width: kPadding8),
+              SizedBox(width: AppSpacing.sm),
               _ActionIconButton(icon: AppIcons.reply),
-              SizedBox(width: kPadding8),
+              SizedBox(width: AppSpacing.sm),
               _ActionIconButton(icon: AppIcons.menu),
             ],
           ),
@@ -272,13 +282,13 @@ class _ActionIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: kActionButtonSize,
-      height: kActionButtonSize,
+      width: NavDimensions.actionButtonSize,
+      height: NavDimensions.actionButtonSize,
       decoration: const BoxDecoration(
-        color: kActionButtonColor,
+        color: actionButtonColor,
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: kWhite, size: kNavIconSize),
+      child: Icon(icon, color: white, size: NavDimensions.iconSize),
     );
   }
 }
@@ -297,13 +307,13 @@ class _CircleIcon extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: kActionButtonSize,
-        height: kActionButtonSize,
+        width: NavDimensions.actionButtonSize,
+        height: NavDimensions.actionButtonSize,
         decoration: const BoxDecoration(
-          color: kActionButtonColor,
+          color: actionButtonColor,
           shape: BoxShape.circle,
         ),
-        child: Icon(icon, color: kWhite, size: kNavIconSize),
+        child: Icon(icon, color: white, size: NavDimensions.iconSize),
       ),
     );
   }
