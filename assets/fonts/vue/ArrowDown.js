@@ -1,0 +1,25 @@
+import { defineComponent, h } from 'vue';
+
+export const ArrowDown = defineComponent({
+  name: 'ArrowDown',
+  props: {
+    class: {
+      type: String,
+      default: ''
+    }
+  },
+  setup(props, { attrs }) {
+    return () => h(
+      'svg',
+      {
+        viewBox: '0 0 20 20',
+        
+        class: `app_icons ${props.class}`,
+        ...attrs
+      },
+      [
+        h('path', {"d": "M8.00006 11.1667C7.86735 11.1673 7.73998 11.1144 7.64673 11.02L2.31339 5.68666C2.12982 5.48965 2.13524 5.18265 2.32565 4.99224C2.51605 4.80183 2.82305 4.79642 3.02006 4.97999L8.00006 9.95999L12.9801 4.97999C13.1771 4.79642 13.4841 4.80183 13.6745 4.99224C13.8649 5.18265 13.8703 5.48965 13.6867 5.68666L8.35339 11.02C8.26014 11.1144 8.13277 11.1673 8.00006 11.1667Z", "fillRule": "evenodd"})
+      ]
+    );
+  }
+});
